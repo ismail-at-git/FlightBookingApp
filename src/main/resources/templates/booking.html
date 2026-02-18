@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Book Flight</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background: #f9f9f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .flight-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 5px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Complete Booking</h2>
+
+        <div class="flight-info">
+            <strong>Flight:</strong> <span th:text="${flight.airline}"></span><br>
+            <strong>Route:</strong> <span th:text="${flight.source}"></span> -> <span
+                th:text="${flight.destination}"></span><br>
+            <strong>Date:</strong> <span th:text="${flight.date}"></span> at <span th:text="${flight.time}"></span><br>
+            <strong>Price:</strong> <span th:text="${flight.price}"></span>
+        </div>
+
+        <form action="/bookings/create" method="post">
+            <input type="hidden" name="flightId" th:value="${flight.id}">
+
+            <label>Passenger Name:</label>
+            <input type="text" name="passengerName" required>
+
+            <label>Email:</label>
+            <input type="email" name="email" required>
+
+            <button type="submit">Confirm Booking</button>
+        </form>
+    </div>
+
+</body>
+
+</html>

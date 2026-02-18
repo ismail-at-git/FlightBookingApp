@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Flight Booking App</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: blue; }
+        .container { max-width: 800px; margin: 0 auto; }
+        form { background: #f9f9f9; padding: 20px; border-radius: 5px; }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        h1 { text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav">
+        <a href="/">Home</a>
+        <a sec:authorize="!isAuthenticated()" href="/login">Login</a>
+        <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard">Admin Dashboard</a>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" style="display:inline; padding:0; background:none;">
+            <button type="submit" style="width:auto; padding: 5px 10px; background: #dc3545;">Logout</button>
+        </form>
+    </div>
+
+    <h1>Search Flights</h1>
+
+    <form action="/flights/search" method="get">
+        <label>Source:</label>
+        <input type="text" name="source" placeholder="e.g. Delhi" required>
+        
+        <label>Destination:</label>
+        <input type="text" name="destination" placeholder="e.g. Mumbai" required>
+        
+        <label>Date:</label>
+        <input type="date" name="date" required>
+        
+        <button type="submit">Search Flights</button>
+    </form>
+</div>
+
+</body>
+</html>
