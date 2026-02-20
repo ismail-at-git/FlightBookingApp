@@ -22,7 +22,10 @@ mvn spring-boot:run
 ```
 
 ### Access the App
-Go to: [http://localhost:8080](http://localhost:8080)
+Go to: [http://localhost:8081](http://localhost:8081)
+
+> [!TIP]
+> **Open Application**: [Click here to open the app](http://localhost:8081)
 
 ## 3. Features
 - **Search Flights**: Enter Source (e.g., "Delhi"), Destination (e.g., "Mumbai"), and Date.
