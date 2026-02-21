@@ -1,46 +1,102 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
-    <title>Flight Booking App</title>
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        .nav { margin-bottom: 20px; }
-        .nav a { margin-right: 15px; text-decoration: none; color: blue; }
-        .container { max-width: 800px; margin: 0 auto; }
-        form { background: #f9f9f9; padding: 20px; border-radius: 5px; }
-        input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        h1 { text-align: center; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyBound - Premium Flight Booking</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
-<div class="container">
-    <div class="nav">
-        <a href="/">Home</a>
-        <a sec:authorize="!isAuthenticated()" href="/login">Login</a>
-        <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard">Admin Dashboard</a>
-        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" style="display:inline; padding:0; background:none;">
-            <button type="submit" style="width:auto; padding: 5px 10px; background: #dc3545;">Logout</button>
-        </form>
+    <div class="container animate-fade">
+        <div class="nav glass">
+            <div class="logo">
+                <a href="/"
+                    style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(to right, #818cf8, #f472b6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">SkyBound</a>
+            </div>
+            <div class="menu">
+                <a href="/">Home</a>
+                <a sec:authorize="!isAuthenticated()" href="/login">Login</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard">Admin Dashboard</a>
+                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit"
+                        style="background: var(--secondary); padding: 5px 15px; margin-left: 10px;">Logout</button>
+                </form>
+            </div>
+        </div>
+
+        <h1>Find Your Next Adventure</h1>
+
+        <div class="glass" style="margin-bottom: 3rem;">
+            <form action="/flights/search" method="get" class="search-form">
+                <div class="form-group">
+                    <label>Leaving From</label>
+                    <input type="text" name="source" placeholder="e.g. Delhi" required>
+                </div>
+                <div class="form-group">
+                    <label>Going To</label>
+                    <input type="text" name="destination" placeholder="e.g. Mumbai" required>
+                </div>
+                <div class="form-group">
+                    <label>Departure Date</label>
+                    <input type="date" name="date" required>
+                </div>
+                <button type="submit">Search Flights</button>
+            </form>
+        </div>
+
+        <div id="quickPreview">
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">Total Available Flights Today</h2>
+            <div id="flightList" class="flights-grid">
+                <!-- Loading state -->
+                <div class="glass flight-card" style="grid-column: 1 / -1; text-align: center;">
+                    <p>Loading available flights...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <h1>Search Flights</h1>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const flightList = document.getElementById('flightList');
 
-    <form action="/flights/search" method="get">
-        <label>Source:</label>
-        <input type="text" name="source" placeholder="e.g. Delhi" required>
-        
-        <label>Destination:</label>
-        <input type="text" name="destination" placeholder="e.g. Mumbai" required>
-        
-        <label>Date:</label>
-        <input type="date" name="date" required>
-        
-        <button type="submit">Search Flights</button>
-    </form>
-</div>
+            // Fetch all flights from the new REST API
+            fetch('/api/flights')
+                .then(response => response.json())
+                .then(flights => {
+                    flightList.innerHTML = '';
+                    if (flights.length === 0) {
+                        flightList.innerHTML = '<div class="glass flight-card" style="grid-column: 1 / -1; text-align: center;"><p>No flights available at the moment.</p></div>';
+                        return;
+                    }
+
+                    // Show first 6 flights as a preview
+                    flights.slice(0, 6).forEach(flight => {
+                        const card = document.createElement('div');
+                        card.className = 'glass flight-card animate-fade';
+                        card.innerHTML = `
+                        <div class="airline-name">${flight.airline}</div>
+                        <div class="flight-info">${flight.source} → ${flight.destination}</div>
+                        <div class="flight-info">Date: ${flight.date} | Time: ${flight.time}</div>
+                        <div class="action-bar">
+                            <span class="price-tag">₹${flight.price}</span>
+                            <span class="badge ${flight.availableSeats > 0 ? 'badge-success' : 'badge-danger'}">
+                                ${flight.availableSeats > 0 ? flight.availableSeats + ' Seats' : 'Sold Out'}
+                            </span>
+                        </div>
+                    `;
+                        flightList.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching flights:', error);
+                    flightList.innerHTML = '<div class="glass flight-card" style="grid-column: 1 / -1; text-align: center; color: #f87171;"><p>Failed to load flight preview.</p></div>';
+                });
+        });
+    </script>
 
 </body>
+
 </html>
