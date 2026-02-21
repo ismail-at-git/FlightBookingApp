@@ -15,7 +15,17 @@ public class FlightService {
     private FlightRepository flightRepository;
 
     public List<Flight> searchFlights(String source, String destination, LocalDate date) {
+        if (date == null) {
+            return flightRepository.findBySourceAndDestination(source, destination);
+        }
         return flightRepository.findBySourceAndDestinationAndDate(source, destination, date);
+    }
+
+    public List<Flight> searchInRange(String source, String destination, LocalDate date, int days) {
+        if (date == null)
+            return searchFlights(source, destination, null);
+        return flightRepository.findBySourceAndDestinationAndDateBetween(
+                source, destination, date.minusDays(days), date.plusDays(days));
     }
 
     public List<Flight> getAllFlights() {

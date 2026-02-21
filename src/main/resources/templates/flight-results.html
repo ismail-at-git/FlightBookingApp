@@ -29,21 +29,35 @@
                     th:text="${param.source}">Delhi</strong></div>
             <div class="flight-info">To: <strong style="color: var(--text-main);"
                     th:text="${param.destination}">Mumbai</strong></div>
-            <div class="flight-info">Date: <strong style="color: var(--text-main);"
+            <div th:if="${param.date}" class="flight-info">Date: <strong style="color: var(--text-main);"
                     th:text="${param.date}">2024-03-01</strong></div>
+            <div th:if="${param.date == null}" class="flight-info">Date: <strong style="color: var(--text-main);">All
+                    Available</strong></div>
         </div>
 
-        <div th:if="${#lists.isEmpty(flights)}" class="glass" style="padding: 3rem; text-align: center;">
-            <h3 style="color: var(--text-muted);">No flights found for this route and date.</h3>
+        <!-- Suggestion if exact date is empty but alternates exist -->
+        <div th:if="${#lists.isEmpty(flights) && !#lists.isEmpty(alternateFlights)}" class="glass"
+            style="padding: 2rem; text-align: center; border-color: #fbbf24; margin-bottom: 3rem;">
+            <h3 style="color: #fbbf24;">No flights found on your selected date.</h3>
+            <p style="color: var(--text-muted);">However, we found alternate flights within 3 days of your requested
+                date. See below.</p>
+        </div>
+
+        <!-- No results anywhere -->
+        <div th:if="${#lists.isEmpty(flights) && (param.date == null || #lists.isEmpty(alternateFlights))}"
+            class="glass" style="padding: 3rem; text-align: center;">
+            <h3 style="color: var(--text-muted);">No flights found for this route.</h3>
             <p style="margin-top: 1rem;"><a href="/" class="book-btn" style="background: var(--primary);">Try another
                     search</a></p>
         </div>
 
+        <!-- Main Results Grid -->
         <div th:unless="${#lists.isEmpty(flights)}" class="flights-grid">
             <div th:each="flight : ${flights}" class="glass flight-card animate-fade">
                 <div class="airline-name" th:text="${flight.airline}">Air India</div>
                 <div class="flight-info" th:text="${flight.source + ' → ' + flight.destination}">Delhi → Mumbai</div>
-                <div class="flight-info" th:text="${'Time: ' + flight.time}">Time: 10:00</div>
+                <div class="flight-info" th:text="${'Date: ' + flight.date + ' | Time: ' + flight.time}">Time: 10:00
+                </div>
 
                 <div class="action-bar">
                     <span class="price-tag" th:text="${'₹' + flight.price}">₹5000</span>
@@ -60,6 +74,37 @@
                     <button th:if="${flight.availableSeats == 0}" disabled
                         style="width: 100%; background: #334155; cursor: not-allowed; transform: none; box-shadow: none;">Sold
                         Out</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternate Results Section -->
+        <div th:if="${!#lists.isEmpty(alternateFlights)}" style="margin-top: 4rem;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #fbbf24;">Alternate Flights (Nearby Dates)</h2>
+            <div class="flights-grid">
+                <div th:each="flight : ${alternateFlights}" class="glass flight-card animate-fade"
+                    style="border-color: rgba(251, 191, 36, 0.3);">
+                    <div class="airline-name" th:text="${flight.airline}">Air India</div>
+                    <div class="flight-info" th:text="${flight.source + ' → ' + flight.destination}">Delhi → Mumbai
+                    </div>
+                    <div class="flight-info" th:text="${'Date: ' + flight.date + ' | Time: ' + flight.time}"
+                        style="color: #fbbf24; font-weight: 600;">Time: 10:00</div>
+
+                    <div class="action-bar">
+                        <span class="price-tag" th:text="${'₹' + flight.price}">₹5000</span>
+                        <div>
+                            <span th:if="${flight.availableSeats > 0}" class="badge badge-success"
+                                th:text="${flight.availableSeats + ' Seats Left'}">10 Seats Left</span>
+                            <span th:if="${flight.availableSeats == 0}" class="badge badge-danger">Sold Out</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <a th:if="${flight.availableSeats > 0}" th:href="@{/bookings/book/{id}(id=${flight.id})}"
+                            class="book-btn"
+                            style="width: 100%; text-align: center; display: block; background: transparent; border: 1px solid #fbbf24; color: #fbbf24;">Book
+                            Alternate</a>
+                    </div>
                 </div>
             </div>
         </div>

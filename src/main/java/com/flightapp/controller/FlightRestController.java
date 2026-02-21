@@ -20,8 +20,12 @@ public class FlightRestController {
     public List<Flight> searchFlights(
             @RequestParam String source,
             @RequestParam String destination,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return flightService.searchFlights(source, destination, date);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        if (date == null) {
+            return flightService.searchFlights(source, destination, null);
+        }
+        // Return flights within 3 days range for API flexibility
+        return flightService.searchInRange(source, destination, date, 3);
     }
 
     @GetMapping

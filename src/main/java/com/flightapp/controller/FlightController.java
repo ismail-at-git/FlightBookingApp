@@ -24,12 +24,26 @@ public class FlightController {
     public String searchFlights(
             @RequestParam("source") String source,
             @RequestParam("destination") String destination,
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             Model model) {
 
-        List<Flight> flights = flightService.searchFlights(source, destination, date);
-        model.addAttribute("flights", flights);
-        model.addAttribute("searchDate", date);
+        if (date == null) {
+            List<Flight> flights = flightService.searchFlights(source, destination, null);
+            model.addAttribute("flights", flights);
+        } else {
+            List<Flight> exactFlights = flightService.searchFlights(source, destination, date);
+            List<Flight> allInRange = flightService.searchInRange(source, destination, date, 3);
+
+            // Filter out exact matches from alternates
+            List<Flight> alternateFlights = allInRange.stream()
+                    .filter(f -> !f.getDate().equals(date))
+                    .toList();
+
+            model.addAttribute("flights", exactFlights);
+            model.addAttribute("alternateFlights", alternateFlights);
+            model.addAttribute("searchDate", date);
+        }
+
         return "flight-results";
     }
 }
